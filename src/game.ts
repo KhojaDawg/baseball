@@ -71,6 +71,7 @@ export class Game {
                 if (bases == 0) {
                     batting.score += 1;
                     console.log(`\t\tSCORE! ${this.home_team.score}-${this.away_team.score}`);
+                    batter.stats.runs_scored += 1;
                     break;
                 } else {
                     this.current_outs += 1;
@@ -84,8 +85,10 @@ export class Game {
         }
         if (this.current_strikes >= 3) {
             this.current_outs += 1;
-            console.log(`\t\tOUT! ${this.current_outs}`);
+            console.log(`\t\tSTRIKEOUT! ${this.current_outs}`);
+            batter.stats.strike_outs += 1;
         }
+        batter.stats.plate_appearances += 1;
         this.current_balls = 0;
         this.current_strikes = 0;
     }

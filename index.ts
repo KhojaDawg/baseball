@@ -19,6 +19,7 @@ const players = {
     "dawn": new Player("Dawn"),
     "ivy": new Player("Ivy"),
     "mata": new Player("Mata"),
+    "munchkinbert": new Player("Munchkinbert"),
 };
 
 const home_team: Team = new Team("Dog Pound");
@@ -39,6 +40,9 @@ away_team.add_player("leah", Position.FirstBase);
 away_team.add_player("haley", Position.SecondBase);
 away_team.add_player("bea", Position.ThirdBase);
 away_team.add_player("florence", Position.Shortstop);
+away_team.add_player("munchkinbert", Position.LeftField);
 
 const game: Game = new Game(home_team, away_team, players);
 game.simulate();
+
+console.log(players);
