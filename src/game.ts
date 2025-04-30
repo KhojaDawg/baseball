@@ -1,4 +1,5 @@
 import { Player, PlayerHandle } from "./player";
+import { random_int as rand_int } from "./random";
 import { Team, Position } from "./team";
 import { ordinal } from "./util";
 
@@ -7,14 +8,13 @@ export class Game {
     home_team: Team;
     away_team: Team;
     players: Object;
-    score_home: number = 0;
-    score_away: number = 0;
     half_inning: number = 0;
     at_bat_home: number = 0;
     at_bat_away: number = 0;
     current_balls: number = 0;
     current_strikes: number = 0;
     current_outs: number = 0;
+    bases: PlayerHandle | null [] = [null, null, null];
 
     constructor(home_team: Team, away_team: Team, players: Object) {
         this.home_team = home_team;
@@ -24,22 +24,70 @@ export class Game {
 
     simulate() {
         console.log(`Simulating game between ${this.home_team.name} and ${this.away_team.name}`);
+        this.home_team.score = 0;
+        this.away_team.score = 0;
+        while (this.half_inning <= 17 || this.home_team.score == this.away_team.score) {
+            this.simulate_inning(this.home_team, this.away_team);
+            this.simulate_inning(this.away_team, this.home_team);
+        }
+        console.log(`Final score: ${this.home_team.score}-${this.away_team.score}`);
+        if (this.home_team.score > this.away_team.score) {
+            console.log(`${this.home_team.name} win!`);
+        } else {
+            console.log(`${this.away_team.name} win!`);
+        }
+    }
 
+    simulate_inning(batting: Team, fielding: Team) {
+        const pitcher: Player = this.players[fielding.get_player_by_position(Position.Pitcher)];
         this.print_half_inning();
-        let pitcher: Player = this.players[this.home_team.get_player_by_position(Position.Pitcher)];
-        console.log(`\tPitcher: ${pitcher.name}`);
-        let at_bat: Player = this.players[this.away_team.players[this.at_bat_away]];
-        console.log(`\tAt bat: ${at_bat.name} ${this.current_balls}-${this.current_strikes}`);
+        console.log(`${fielding.name} take the field! Pitcher: ${pitcher.name}`);
+        while (this.current_outs < 3) {
+            const batter_handle = batting.players[batting.at_bat % batting.players.length];
+            const batter = this.players[batter_handle];
+            this.simulate_at_bat(batter, batting, fielding);
+            batting.at_bat += 1;
+        }
+        this.current_outs = 0;
         this.half_inning += 1;
+    }
 
-        this.print_half_inning();
-        pitcher = this.players[this.away_team.get_player_by_position(Position.Pitcher)];
-        console.log(`\tPitcher: ${pitcher.name}`);
-        at_bat = this.players[this.home_team.players[this.at_bat_away]];
-        console.log(`\tAt bat: ${at_bat.name} ${this.current_balls}-${this.current_strikes}`);
-        this.half_inning += 1;
-
-        this.print_half_inning();
+    simulate_at_bat(batter: Player, batting: Team, fielding: Team) {
+        const pitcher: Player = this.players[fielding.get_player_by_position(Position.Pitcher)];
+        console.log(`\tAt bat: ${batter.name}`);
+        while (this.current_strikes < 3) {
+            const result = rand_int(0, 2);
+            if (result == 0) {
+                this.current_balls += 1;
+                console.log(`\t\tBall! ${this.current_balls}-${this.current_strikes}-${this.current_outs}`);
+            }
+            else if (result == 1) {
+                this.current_strikes += 1;
+                console.log(`\t\tStrike! ${this.current_balls}-${this.current_strikes}-${this.current_outs}`);
+            }
+            else if (result == 2) {
+                console.log(`\t\tHit!`);
+                const bases = rand_int(0, 3);
+                if (bases == 0) {
+                    batting.score += 1;
+                    console.log(`\t\tSCORE! ${this.home_team.score}-${this.away_team.score}`);
+                    break;
+                } else {
+                    this.current_outs += 1;
+                    console.log(`\t\tOUT! ${this.current_outs}`);
+                    break;
+                }
+            }
+            else {
+                throw new RangeError(`Invalid batting result: ${result}`);
+            }
+        }
+        if (this.current_strikes >= 3) {
+            this.current_outs += 1;
+            console.log(`\t\tOUT! ${this.current_outs}`);
+        }
+        this.current_balls = 0;
+        this.current_strikes = 0;
     }
 
     print_half_inning() {
@@ -48,6 +96,6 @@ export class Game {
         if (this.half_inning % 2 != 0) {
             frame = "bottom";
         }
-        console.log(`${frame} of the ${ordinal(inning)} ${this.score_home}-${this.score_away}-${this.current_outs}`);
+        console.log(`${frame} of the ${ordinal(inning)} ${this.home_team.score}-${this.away_team.score}`);
     }
 }

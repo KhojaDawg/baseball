@@ -21,6 +21,8 @@ export class Team {
     name: string = "";
     players: PlayerHandle[] = [];
     positions: Positions = [null, null, null, null, null, null, null, null, null];
+    at_bat: number = 0;
+    score: number = 0;
 
     constructor(name: string) {
         this.name = name;
