@@ -1,4 +1,4 @@
-import { players } from "./src/database";
+import { players, print_players_stats } from "./src/database";
 import { Player, Position } from "./src/player";
 import { Team } from "./src/team";
 import { Game } from "./src/game";
@@ -28,4 +28,4 @@ away_team.add_player(players["angela"], Position.CenterField);
 const game: Game = new Game(home_team, away_team);
 game.simulate();
 
-// console.log(players)
+print_players_stats();
