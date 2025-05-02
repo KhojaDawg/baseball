@@ -1,0 +1,66 @@
+[
+    {
+        "name": "Team A",
+        "players": [
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            }
+        ]
+    },
+    {
+        "name": "Team B",
+        "players": [
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            },
+            {
+                "name": "EMPTY"
+            }
+        ]
+    }
+]

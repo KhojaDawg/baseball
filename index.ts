@@ -5,10 +5,9 @@ import { Player, Position } from "./src/player";
 import { Team } from "./src/team";
 import { Game } from "./src/game";
 
-console.log(process.env.DISCORD_TOKEN);
-
 async function load_team_data(): Promise<void> {
-    const team_data_path = "./data/teams.json";
+    const team_data_path = process.env.TEAM_DATA_PATH ? process.env.TEAM_DATA_PATH : "./data/teams.json";
+    console.log(team_data_path);
     const json_team_data = await fs.promises.readFile(team_data_path, "utf-8");
     const loaded_team_data = JSON.parse(json_team_data);
 

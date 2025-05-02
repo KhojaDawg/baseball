@@ -1,6 +1,6 @@
 build/
-data/
 node_modules/
+user_data/
 
 .env
 .env.test
