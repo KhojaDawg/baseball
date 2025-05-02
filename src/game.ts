@@ -43,11 +43,11 @@ export class Game {
         } else {
             console.log(`${this.away_team.name} win!`);
         }
-        console.log(this.stats);
+        // console.log(this.stats);
     }
 
     simulate_inning(batting: Team, fielding: Team) {
-        const pitcher: Player = fielding.get_player_by_position(Position.Pitcher);
+        const pitcher: Player = fielding.get_position_player(Position.Pitcher);
         this.print_half_inning();
         console.log(`${fielding.name} take the field! Pitcher: ${pitcher.name}`);
         console.log(`${batting.name} to bat`);
@@ -62,7 +62,7 @@ export class Game {
     }
 
     simulate_at_bat(batter: Player, batting: Team, fielding: Team) {
-        const pitcher: Player = fielding.get_player_by_position(Position.Pitcher);
+        const pitcher: Player = fielding.get_position_player(Position.Pitcher);
         console.log(`\tAt bat: ${batter.name} (${this.home_team.score}-${this.away_team.score})`);
         this.bases[0] = batter;
         let at_bat = false;

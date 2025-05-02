@@ -1,31 +1,39 @@
-import { players, print_players_stats } from "./src/database";
+import "dotenv/config";
+import * as fs from "fs";
+import { teams } from "./src/database";
 import { Player, Position } from "./src/player";
 import { Team } from "./src/team";
 import { Game } from "./src/game";
 
+console.log(process.env.DISCORD_TOKEN);
 
-const home_team: Team = new Team("Dog Pound");
-home_team.add_new_player("khoja", new Player("Khoja"), Position.Pitcher);
-home_team.add_player(players["andrew"], Position.Catcher);
-home_team.add_player(players["adam"], Position.FirstBase);
-home_team.add_player(players["dawn"], Position.SecondBase);
-home_team.add_player(players["ivy"], Position.ThirdBase);
-home_team.add_player(players["andrea"], Position.Shortstop);
-home_team.add_player(players["liliana"], Position.CenterField);
-home_team.add_player(players["mata"], Position.LeftField);
-home_team.add_player(players["sean"], Position.RightField);
+async function load_team_data(): Promise<void> {
+    const team_data_path = "./data/teams.json";
+    const json_team_data = await fs.promises.readFile(team_data_path, "utf-8");
+    const loaded_team_data = JSON.parse(json_team_data);
 
-const away_team: Team = new Team("Gremlins");
-away_team.add_player(players["eli"], Position.Pitcher);
-away_team.add_player(players["jace"], Position.Catcher);
-away_team.add_player(players["leah"], Position.FirstBase);
-away_team.add_player(players["haley"], Position.SecondBase);
-away_team.add_player(players["bea"], Position.ThirdBase);
-away_team.add_player(players["florence"], Position.Shortstop);
-away_team.add_player(players["munchkinbert"], Position.LeftField);
-away_team.add_player(players["angela"], Position.CenterField);
+    // console.log(loaded_team_data);
 
-const game: Game = new Game(home_team, away_team);
-game.simulate();
+    for (const team_data of loaded_team_data) {
 
-print_players_stats();
+        // console.log(team_data);
+
+        const new_team: Team = new Team(team_data["name"]);
+        const players: Object[] = team_data["players"];
+
+        // console.log(players);
+
+        for (let i: number = 0; i < players.length; i += 1) {
+            let position: Position = i;
+            let player_data = players[i];
+            let player = new Player(player_data["name"]);
+            new_team.add_player(player, position);
+        }
+        teams.push(new_team);
+    }
+};
+
+load_team_data().then(() => {
+    let game: Game = new Game(teams[0], teams[1]);
+    game.simulate();
+});
