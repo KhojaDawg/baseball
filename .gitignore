@@ -4,3 +4,4 @@ user_data/
 
 .env
 .env.test
+*.sqlite

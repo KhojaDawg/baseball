@@ -23,11 +23,22 @@ const rest = new REST().setToken(process.env.TOKEN);
 	try {
 		console.log(`Started refreshing ${commands_json.length} application (/) commands.`);
 
-		// The put method is used to fully refresh all commands in the guild with the current set
-		const data = await rest.put(
-			Routes.applicationGuildCommands(process.env.APP_ID, process.env.GUILD_ID),
-			{ body: commands_json },
-		);
+		// If a GUILD_ID environment variable is provided, update commands for the specific guild
+		// (faster for testing). Otherwise update the commands globally (significantly slower)
+		if (process.env.GUILD_ID) {
+			console.log(`Updating bot commands for guild ${process.env.GUILD_ID}`);
+			await rest.put(
+				Routes.applicationGuildCommands(process.env.APP_ID, process.env.GUILD_ID),
+				{ body: commands_json },
+			);
+		}
+		else {
+			console.log("Updating bot commands globally");
+			await rest.put(
+				Routes.applicationCommands(process.env.APP_ID),
+				{ body: commands_json },
+			);
+		}
 
 		console.log(`Successfully reloaded application (/) commands.`);
 	} catch (error) {
