@@ -1,3 +1,5 @@
+import * as random from "./random";
+
 export function ordinal(num: number): string {
     if (num == 1) {
         return "1st";
@@ -9,3 +11,5 @@ export function ordinal(num: number): string {
         return `${num}th`
     }
 }
+
+export { random };

@@ -4,6 +4,9 @@
   "description": "Simple baseball simulator to be used by other applications",
   "main": "build/index.js",
   "scripts": {
+	"bot": "node ./build/index.js",
+	"deploy": "node ./build/deploy-commands.js",
+	"build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Khoja :3",

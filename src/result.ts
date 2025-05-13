@@ -1,4 +1,4 @@
-import { random_int as rand_int } from "./random";
+import { random as rand } from "./util";
 
 
 export enum HitResult {
@@ -28,6 +28,6 @@ export function random_hit_result(): HitResult {
     for (let i: number = 0; i < hit_result_weight(HitResult.Double); i++) table.push(HitResult.Double);
     for (let i: number = 0; i < hit_result_weight(HitResult.Triple); i++) table.push(HitResult.Triple);
     for (let i: number = 0; i < hit_result_weight(HitResult.HomeRun); i++) table.push(HitResult.HomeRun);
-    const index = rand_int(0, table.length-1);
+    const index = rand.random_int(0, table.length-1);
     return table[index];
 }
