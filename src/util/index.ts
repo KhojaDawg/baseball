@@ -12,4 +12,8 @@ export function ordinal(num: number): string {
     }
 }
 
+export async function sleep(ms: number): Promise<any> {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export { random };

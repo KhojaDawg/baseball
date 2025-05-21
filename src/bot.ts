@@ -1,6 +1,6 @@
 import { Client, Collection, Events, GatewayIntentBits, MessageFlags } from "discord.js";
 import { commands as commands_list, Command } from "./commands";
-import { Player, Team } from "./database";
+import { Game, Player, Team } from "./database";
 
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -38,6 +38,7 @@ client.once(Events.ClientReady, async readyClient => {
 	console.log("Setting up database");
 	await Player.sync();
 	await Team.sync();
+	await Game.sync();
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
