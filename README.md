@@ -68,6 +68,7 @@ Top level items are commands, bulleted lists contain subcommands with their opti
 Commands for getting or manipulating player data
 
 * `register <?team> <?position>` register yourself as a player in your discord server league. You can optionally specify a team by its name or UUID (case sensitive) and a position to play.
+* `get <target>` returns detailed information on the target player. Player can be specified by name (case-sensitive exact match) or UUID
 * `list <?team>` list players on the given team if a team name or UUID is provided, otherwise lists all players in your discord server league
 * `edit <player> <?name> <?team> <?position>` edits the details of the given player. Player is selected by name or UUID (must be an exact case-sensitive match). Currently you can change a player's name, team, or fielding position. Multiple values can be updated at once.
 
@@ -77,6 +78,7 @@ Commands for getting or manipulating team data
 
 * `create <name>` creates a new team with the given name
 * `get <team>` returns detailed information about a specific team. Team can be specified by name (case-sensitive) or UUID
+* `edit <team> <?name>` updates the specified team with the given information. Team can be specified by name (case-sensitive) or UUID.
 * `list` returns a list of all the teams in the server with their UUIDs
 * `fill <?team>` fills any empty positions on the given team with randomly generated players, or if no team is specified fills all teams in your server's league
 

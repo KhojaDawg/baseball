@@ -1,4 +1,6 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, User } from "discord.js";
+import {
+	ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder, User
+} from "discord.js";
 import { Op } from "sequelize";
 import { Command } from "./index";
 import { Position, Player, Team } from "../database";
@@ -24,6 +26,12 @@ export const players: Command = {
 					{ name: "Center Field", value: Position.CenterField },
 					{ name: "Right Field", value: Position.RightField },
 				))
+	)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName("get")
+				.setDescription("Gets information for a specific player")
+				.addStringOption(option => option.setName("target").setDescription("Player to get info for").setRequired(true))
 		)
 		.addSubcommand(subcommand =>
 			subcommand
@@ -54,6 +62,7 @@ export const players: Command = {
 	execute: async (interaction) => {
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === "register") await execute_register_subcommand(interaction);
+		else if (subcommand === "get") await execute_get_subcommand(interaction);
 		else if (subcommand === "list") await execute_list_subcommand(interaction);
 		else if (subcommand === "edit") await execute_edit_subcommand(interaction);
 		else await interaction.reply(`Error: no subcommand "${subcommand}" for "players" command`);
@@ -90,6 +99,29 @@ async function execute_register_subcommand(interaction: ChatInputCommandInteract
 			await interaction.reply(`New player ${new_player.name} created for user ${new_player.discord_user} as free agent. Position: ${new_player.position}`)
 		}
 	}
+}
+
+
+async function execute_get_subcommand(interaction: ChatInputCommandInteraction): Promise<any> {
+	const guild_id = interaction.guild.id;
+	const player_search = interaction.options.getString("target");
+	await interaction.reply({
+		content: `Getting player information for "${player_search}"`,
+		flags: MessageFlags.Ephemeral,
+	});
+	const player: Player = await Player.findOne({
+		where: {
+			[Op.or]: { name: player_search, uuid: player_search },
+			guild: guild_id
+		}
+	});
+	const team: Team = await player.getTeam();
+	const response = new EmbedBuilder()
+		.setTitle(player.name)
+		.setDescription(`${player.position_name()} for ${team.name}`)
+		.setFooter({ text: player.uuid })
+		.setTimestamp();
+	interaction.channel.send({ embeds: [response] });
 }
 
 

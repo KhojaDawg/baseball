@@ -1,10 +1,8 @@
 import "dotenv/config";
 import {
-	Sequelize, DataTypes, Model, InferAttributes, InferCreationAttributes,
-	BelongsToSetAssociationMixin, HasManyAddAssociationMixin, HasManyGetAssociationsMixin,
-	HasManyHasAssociationMixin,
-	HasManyAddAssociationsMixin,
-	BelongsToGetAssociationMixin,
+	Sequelize, DataTypes, Model, InferAttributes, InferCreationAttributes, Op,
+	BelongsToGetAssociationMixin, BelongsToSetAssociationMixin, HasManyAddAssociationMixin,
+	HasManyAddAssociationsMixin, HasManyGetAssociationsMixin, HasManyHasAssociationMixin,
 	HasManyRemoveAssociationMixin,
 } from "sequelize";
 import { random as rand } from "./util";
@@ -30,6 +28,18 @@ export enum Position {
     RightField = "right_field",
 }
 
+function position_name(pos: Position): string {
+	if (pos == Position.Pitcher) return "Pitcher";
+	else if (pos === Position.Catcher) return "Catcher";
+	else if (pos === Position.FirstBase) return "First Base";
+	else if (pos === Position.SecondBase) return "Second Base";
+	else if (pos === Position.ThirdBase) return "Third Base";
+	else if (pos === Position.Shortstop) return "Shortstop";
+	else if (pos === Position.LeftField) return "Left Field";
+	else if (pos === Position.CenterField) return "Center Field";
+	else if (pos === Position.RightField) return "Right Field";
+}
+
 // Returns an iterable array of all possible positions. Used for enumeration
 export function all_positions(): Position[] {
 	return [
@@ -49,6 +59,17 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	declare getTeam: BelongsToGetAssociationMixin<Team>;
 	declare setTeam: BelongsToSetAssociationMixin<Team, string>;
+
+	static async findByPosition(position: Position, guild: string, team: string): Promise<Player> {
+		return Player.findOne({
+			where: { position: position, guild: guild },
+			include: { model: Team, where: { uuid: team } },
+		});
+	}
+
+	position_name(): string {
+		return position_name(this.position);
+	}
 };
 Player.init(
 	{
@@ -100,6 +121,10 @@ export class Team extends Model<InferAttributes<Team>, InferCreationAttributes<T
 	declare getPlayers: HasManyGetAssociationsMixin<Player>;
 	declare hasPlayer: HasManyHasAssociationMixin<Player, string>;
 	declare removePlayer: HasManyRemoveAssociationMixin<Player, string>;
+
+	static async findBySearch(search: string, guild: string): Promise<Team> {
+		return Team.findOne({ where: { [Op.or]: { name: search, uuid: search }, guild: guild } });
+	}
 }
 Team.init(
 	{

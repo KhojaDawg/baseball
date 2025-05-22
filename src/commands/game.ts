@@ -68,10 +68,7 @@ async function execute_simulate_game_subcommand(interaction: ChatInputCommandInt
 			fielding_team = away_team;
 		}
 		// get the pitcher and batting lineup for this half-inning
-		const pitcher: Player = await Player.findOne({
-			where: { guild: guild_id, position: Position.Pitcher },
-			include: { model: Team, where: { uuid: fielding_team.uuid } },
-		});
+		const pitcher: Player = await Player.findByPosition(Position.Pitcher, guild_id, fielding_team.uuid);
 		const batters: Player[] = await batting_team.getPlayers();
 		// simulate half-inning
 		await thread.send(`# ${game.inning_name()}\n${batting_team.name} are batting while ${fielding_team.name} take the field, with ${pitcher.name} pitching`);

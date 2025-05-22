@@ -1,26 +1,65 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { Op } from "sequelize";
 import { Command } from "./index";
-import { Player, Team, createRandomPlayer, all_positions } from "../database";
+import { Player, Team, createRandomPlayer, all_positions, Position } from "../database";
 
 
 async function execute_list_subcommand(interaction: ChatInputCommandInteraction): Promise<any> {
+	await interaction.reply("Getting list of all teams");
 	const guild_id = interaction.guild.id
 	const teams = await Team.findAll({where: { guild: guild_id }});
-	if (teams.length > 0) {
-		let reply = "Teams:\n";
-		for (const team of teams) {
-			reply += `* Name: ${team.name} UUID: ${team.uuid} Guild: ${team.guild}\n`;
-		}
-		await interaction.reply(reply);
-	} else {
-		await interaction.reply("No teams registered yet. Use `/teams create <team_name>` to create a new one");
+	const response = new EmbedBuilder().setTitle(`${interaction.guild.name} League Teams`);
+	for (const team of teams) {
+		response.addFields({ name: team.name, value: "0-0-0", inline: true });
 	}
+	response.setTimestamp();
+	interaction.channel.send({ embeds: [response] });
+}
+
+
+async function execute_get_subcommand(interaction: ChatInputCommandInteraction): Promise<any> {
+	const guild_id = interaction.guild.id;
+	const team_search = interaction.options.getString("team");
+	const team = await Team.findOne({
+		where: {
+			[Op.or]: { uuid: team_search, name: team_search },
+			guild: guild_id,
+		}
+	});
+	await interaction.reply(`Getting information for team ${team.name}`);
+	const pitcher: Player = await Player.findByPosition(Position.Pitcher, guild_id, team.uuid);
+	const catcher: Player = await Player.findByPosition(Position.Catcher, guild_id, team.uuid);
+	const first_base: Player = await Player.findByPosition(Position.FirstBase, guild_id, team.uuid);
+	const second_base: Player = await Player.findByPosition(Position.SecondBase, guild_id, team.uuid);
+	const third_base: Player = await Player.findByPosition(Position.ThirdBase, guild_id, team.uuid);
+	const shortstop: Player = await Player.findByPosition(Position.Shortstop, guild_id, team.uuid);
+	const left_field: Player = await Player.findByPosition(Position.LeftField, guild_id, team.uuid);
+	const center_field: Player = await Player.findByPosition(Position.CenterField, guild_id, team.uuid);
+	const right_field: Player = await Player.findByPosition(Position.RightField, guild_id, team.uuid);
+	const response = new EmbedBuilder()
+		.setTitle(`Team ${team.name}`)
+		.setDescription(`Team in the ${interaction.guild.name} Discord baseball league`)
+		.addFields(
+			{ name: "Pitcher", value: pitcher.name, inline: true },
+			{ name: "Catcher", value: catcher.name, inline: true },
+			{ name: "", value: "", inline: false },
+			{ name: "First Base", value: first_base.name, inline: true },
+			{ name: "Second Base", value: second_base.name, inline: true },
+			{ name: "Shortstop", value: shortstop.name, inline: true },
+			{ name: "Third Base", value: third_base.name, inline: true },
+			{ name: "", value: "", inline: false },
+			{ name: "Left Field", value: left_field.name, inline: true },
+			{ name: "Center Field", value: center_field.name, inline: true },
+			{ name: "Right Field", value: right_field.name, inline: true },
+		)
+		.setFooter({ text: team.uuid })
+		.setTimestamp();
+	interaction.channel.send({ embeds: [response] });
 }
 
 
 async function execute_create_subcommand(interaction: ChatInputCommandInteraction): Promise<any> {
-	const guild_id = interaction.guild.id
+	const guild_id = interaction.guild.id;
 	const team_name = interaction.options.getString("team_name");
 	console.log(`Creating new team ${team_name} for guild ${guild_id}`);
 	const new_team = await Team.create({ name: team_name, guild: guild_id });
@@ -32,6 +71,21 @@ async function execute_create_subcommand(interaction: ChatInputCommandInteractio
 }
 
 
+async function execute_edit_subcommand(interaction: ChatInputCommandInteraction): Promise<any> {
+	const guild_id = interaction.guild.id;
+	const team_search = interaction.options.getString("team");
+	const team: Team = await Team.findBySearch(team_search, guild_id);
+	if (team) {
+		const new_name = interaction.options.getString("name");
+		if (new_name) team.name = new_name;
+		team.save();
+		await interaction.reply("Team edited successfully");
+	} else {
+		await interaction.reply(`No team found with name or UUID "${team_search}`);
+	}	
+}
+
+
 async function execute_fill_subcommand(interaction: ChatInputCommandInteraction): Promise<any> {
 	const guild_id = interaction.guild.id
 	const team_search = interaction.options.getString("team_name");
@@ -39,7 +93,12 @@ async function execute_fill_subcommand(interaction: ChatInputCommandInteraction)
 	let reply = "";
 	if (team_search) {
 		console.log(`Filling team ${team_search} with random players`);
-		const team: Team = await Team.findOne({ where: { [Op.or]: [{ uuid: team_search }, { name: team_search }], guild: guild_id } });
+		const team: Team = await Team.findOne({
+			where: {
+				[Op.or]: [{ uuid: team_search }, { name: team_search }],
+				guild: guild_id,
+			}
+		});
 		if (team) {
 			reply += `Filling empty slots in team ${team.name} with randomly generated players`;
 			teams.push(team);
@@ -64,7 +123,7 @@ async function execute_fill_subcommand(interaction: ChatInputCommandInteraction)
 				include: { model: Team, where: { uuid: team.uuid } }
 			});
 			if (position_count == 0) {
-				console.log(`\tCreating new ${position}`);
+				// console.log(`\tCreating new ${position}`);
 				new_players.push(await createRandomPlayer(position, guild_id));
 			}
 		}
@@ -89,7 +148,14 @@ export const teams: Command = {
 			subcommand
 				.setName("get")
 				.setDescription("Gets a specific team's info. To return a list of all teams on the server, see `list` subcommand")
-				.addStringOption(option => option.setName("uuid").setDescription("UUID of the team you wish to get info for"))
+				.addStringOption(option => option.setName("team").setDescription("Name or UUID of the team you wish to get info for").setRequired(true))
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName("edit")
+				.setDescription("Edit the given team's information")
+				.addStringOption(option => option.setName("team").setDescription("Name or UUID of the team to edit").setRequired(true))
+				.addStringOption(option => option.setName("name").setDescription("New name for the team").setRequired(false))
 		)
 		.addSubcommand(subcommand =>
 			subcommand
@@ -106,6 +172,8 @@ export const teams: Command = {
 		// console.log("Executing team command");
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === "list") await execute_list_subcommand(interaction);
+		else if (subcommand === "get") await execute_get_subcommand(interaction);
+		else if (subcommand === "edit") await execute_edit_subcommand(interaction);
 		else if (subcommand === "create") await execute_create_subcommand(interaction);
 		else if (subcommand === "fill") await execute_fill_subcommand(interaction);
 		else await interaction.reply("Not implemented");
