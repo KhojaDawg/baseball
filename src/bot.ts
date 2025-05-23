@@ -1,10 +1,11 @@
 import { Client, Collection, Events, GatewayIntentBits, MessageFlags } from "discord.js";
-import { commands as commands_list, Command } from "./commands";
+import { commands_list, Command } from "./commands";
 import { Game, Player, Team } from "./database";
 
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 const commands: Collection<string, Command> = new Collection();
+
 for (const command of commands_list) {
 	// Set a new item in the Collection with the key as the command name and the value as the exported module
 	if (command.data && command.execute) {

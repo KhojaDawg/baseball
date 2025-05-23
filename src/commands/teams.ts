@@ -134,7 +134,7 @@ async function execute_fill_subcommand(interaction: ChatInputCommandInteraction)
 }
 
 
-export const teams: Command = {
+export const teams_command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("teams")
 		.setDescription("Manipulation of teams, such as adding new teams, editing existing teams, or retrieving team data")
@@ -167,7 +167,8 @@ export const teams: Command = {
 				.setName("fill")
 				.setDescription("Fills any empty spaces in the given team with randomly generated characters")
 				.addStringOption(option => option.setName("team_name").setDescription("Name or UUID of team to fill"))
-		),
+		)
+		.addSubcommand(subcommand => subcommand.setName("help").setDescription("Get a list of subcommands for `/teams` and their usage")),
 	execute: async (interaction: ChatInputCommandInteraction) => {
 		// console.log("Executing team command");
 		const subcommand = interaction.options.getSubcommand();
@@ -176,7 +177,16 @@ export const teams: Command = {
 		else if (subcommand === "edit") await execute_edit_subcommand(interaction);
 		else if (subcommand === "create") await execute_create_subcommand(interaction);
 		else if (subcommand === "fill") await execute_fill_subcommand(interaction);
+		else if (subcommand === "help") {
+			let reply = "`/teams <subcommand>`\n";
+			reply += "* `create <name>` creates a new team with the given name\n";
+			reply += "* `get <team>` gets detailed information on a single team. You can specify either the team name or its UUID for the `<team>` option, but note that it must be an exact case-sensitive match.\n";
+			reply += "* `edit <team> <?name>` updates the specified team with the given information. The `<team>` option can be either the team name or its UUID, so long as it's an exact case-sensitive match\n";
+			reply += "* `list` prints a list of all teams in this server with some basic win/loss statistics\n";
+			reply += "* `fill <?team>` fills any open positions on the specified team with randomly generated players. You can specify the team with either its name or its UUID so long as it is an exact case-sensitive match. If no team is provided, ALL teams on this server will have their empty positions filled.\n";
+			await interaction.reply(reply);
+		}
 		else await interaction.reply("Not implemented");
 	},
 };
-export default teams;
+export default teams_command;

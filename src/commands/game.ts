@@ -119,7 +119,7 @@ async function execute_simulate_game_subcommand(interaction: ChatInputCommandInt
 }
 
 
-const game_commands: Command = {
+export const game_command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("game")
 		.setDescription("Simulate games or get information about past games")
@@ -130,12 +130,23 @@ const game_commands: Command = {
 				.addStringOption(option => option.setName("home_team").setDescription("Name or UUID of the home team in the simulated game").setRequired(true))
 				.addStringOption(option => option.setName("away_team").setDescription("Name or UUID of the away team in the simulated game").setRequired(true))
 				.addNumberOption(option => option.setName("innings").setDescription("Number of innings to play").setRequired(false))
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName("help")
+				.setDescription("Show a list of `game` subcommands and their usage")
 		),
 	execute: async (interaction: ChatInputCommandInteraction) => {
 		const subcommand = interaction.options.getSubcommand();
-		if (subcommand === "simulate") await execute_simulate_game_subcommand(interaction);
+		if (subcommand === "simulate") await execute_simulate_game_subcommand(interaction)
+		else if (subcommand === "help") {
+			let reply = "`/game <subcommand>` list of possible subcommands\n";
+			reply += "* `simulate <home_team> <away_team> <?innings>` simulates a game between the given `<home_team>` and `<away_team>`. Teams can be specified by either their name or UUID, as long as it is an exact case sensitive match. Optionally, you can provide a number for `<innings>` that determines how many innings to play. If ommitted, defaults to 9 innings.\n";
+			await interaction.reply(reply);
+		}
+		else await interaction.reply(`Unknown subcommand ${subcommand}`);
 	}
 }
 
 
-export default game_commands;
+export default game_command;

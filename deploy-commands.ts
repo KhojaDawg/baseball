@@ -1,11 +1,11 @@
 import "dotenv/config";
 import { REST, Routes } from "discord.js";
-import { commands } from "./src/commands";
+import { commands_list } from "./src/commands";
 
 
 const commands_json = [];
 
-for (const command of commands) {
+for (const command of commands_list) {
 	// console.log(`Registering command ${command.data.name}`);
 	// Create an array of command JSON data
 	if (command.data && command.execute) {

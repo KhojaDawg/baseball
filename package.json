@@ -1,6 +1,6 @@
 {
   "name": "baseball",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Simple baseball simulator to be used by other applications",
   "main": "build/index.js",
   "scripts": {
@@ -12,7 +12,7 @@
   "author": "Khoja :3",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^22.15.3",
+    "@types/node": "^22.15.21",
     "typescript": "^5.8.3"
   },
   "dependencies": {

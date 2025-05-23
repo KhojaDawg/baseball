@@ -6,7 +6,7 @@ import { Command } from "./index";
 import { Position, Player, Team } from "../database";
 
 
-export const players: Command = {
+export const players_command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("players")
 		.setDescription("Manipulates player data. Allows creating, editing, and getting lists of players")
@@ -57,6 +57,11 @@ export const players: Command = {
 					{ name: "Center Field", value: Position.CenterField },
 					{ name: "Right Field", value: Position.RightField },
 				))
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName("help")
+				.setDescription("Lists subcommands for the `/players` command and their usage")
 		),
 	
 	execute: async (interaction) => {
@@ -65,6 +70,14 @@ export const players: Command = {
 		else if (subcommand === "get") await execute_get_subcommand(interaction);
 		else if (subcommand === "list") await execute_list_subcommand(interaction);
 		else if (subcommand === "edit") await execute_edit_subcommand(interaction);
+		else if (subcommand === "help") {
+			let reply = "Subcommands for `/players <subcommand>` and their options. Options with `?` in their name are not required, options without are required.\n";
+			reply += "* `register <?team> <?position>` register yourself as a player in this server's Discord Baseball League. You can optionally provide a team to play on and/or position to play\n";
+			reply += "* `get <player>` gets detailed information about the given player. Player can be specified by name (exact, case-sensitive) or UUID\n";
+			reply += "* `edit <player> <?name> <?team> <?position>` updates the stored information for the specified player. Player can be specified by name (exact, case-sensitive) or UUID. The rest of the optional values are the info to update on the selected player.\n";
+			reply += "* `list <?team>` returns a list of players. If a team name or UUID is provided, the response will list just the players for that team. Otherwise, it will list all players in your server's league.\n"
+			await interaction.reply(reply);
+		}
 		else await interaction.reply(`Error: no subcommand "${subcommand}" for "players" command`);
 		
 	},
@@ -195,4 +208,4 @@ async function execute_edit_subcommand(interaction: ChatInputCommandInteraction)
 }
 
 
-export default players;
+export default players_command;

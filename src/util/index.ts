@@ -17,3 +17,6 @@ export async function sleep(ms: number): Promise<any> {
 }
 
 export { random };
+
+const VERSION = "0.0.1";
+export { VERSION };
